@@ -44,4 +44,58 @@ the lazy strategy means that when the owner is fetched from the database, all th
 
 The @OneToMany annotation has two attributes that we are using. The cascade attribute defines how cascading affects the entities in the case of deletions or updates. The ALL attribute setting means that all operations are cascaded. For example, if the owner is deleted, the cars that are linked to that owner are deleted as well. The mappedBy="owner" attribute setting tells us that the Car class has the owner field, which is the foreign key for this relationship.
 
+If you want to create a many-to-many relationship instead, which means, in practice, that an owner can have multiple cars and a car can have multiple owners, you should use the @ManyToMany annotation. 
+  
+Next, you will learn how to change the relationship to many-to-many. In a many-to-many
+relationship, it is recommended that you use Set instead of List with Hibernate:
+  ex Car Class @ManyToMany(mappedBy="cars")
+private Set<Owner> owners = new HashSet<Owner>();
+  
+  Owner Class @ManyToMany(cascade=CascadeType.PERSIST)
+@JoinTable(name="car_owner",
+joinColumns = { @JoinColumn(name="ownerid") },
+inverseJoinColumns = { @JoinColumn(name="id") })
+private Set<Car> cars = new HashSet<Car>();
+  
+  Now, if you run the application, there will be a new join table called car_owner that is created between the car and owner tables. The join table is a special kind of table that manages the many-to-many relationship between two tables. The join table is defined by using the @JoinTable annotation. 
+  
+  
+  
+Web services are applications that communicate over the internet using the HTTP protocol. There are many different types of web service architectures, but the principal idea across all designs is the same. In this book, we are creating a RESTful web service from what is nowadays a really popular design.
 
+Representational State Transfer (REST) is an architectural style for creating web services. REST is not a standard, but it defines a set of constraints defined by Roy Fielding.
+  The six constraints are,
+Stateless: The server doesn't hold any information about the client state.  
+Client: The client and server act independently. The server does not send any
+information without a request from the client.
+Cacheable: Many clients often request the same resources; therefore, it is useful to cache responses in order to improve performance.
+Uniform interface: Requests from different clients look the same. Clients may include, for example, a browser, a Java application, and a mobile application.  
+            The uniform interface is an important constraint, and it means that every REST architecture should have the following elements:
+           - Identification of resources: There are resources with their unique identifiers, for example, URIs in web-based REST services. REST resources          
+            should expose easily understood directory structure URIs. Therefore, a good resource naming strategy is very important.
+           - Resource manipulation through representation: When making a request to
+            a resource, the server responds with a representation of the resource. Typically, the format of the representation is JSON or XML.
+           - Self-descriptive messages: Messages should have sufficient information that the server knows how to process them.
+           - Hypermedia as the Engine of Application State (HATEOAS): Responses can contain links to other areas of service.
+Layered system: REST allows us to use a layered system architecture.
+Code on demand: This is an optional constraint.
+  
+  
+  
+  You can define the endpoint of service in your application.properties file as follows:
+  spring.data.rest.basePath=/api
+Now, you can access the RESTful web service from the localhost:8080/api endpoint. By calling the root endpoint of the service, it returns the resources that are available. Spring Data REST returns JSON data in the Hypertext Application Language (HAL) format. The HAL format provides a set of conventions for expressing hyperlinks in JSON and it makes your RESTful web service easier to use for frontend developers:
+  
+  In the previous chapter, we created queries to our repository. These queries
+can also be included in our service. To include queries, you have to add the @RepositoryRestResource annotation to the repository class. Query parameters are annotated with the @Param annotation.
+  ex @RepositoryRestResource
+public interface CarRepository extends CrudRepository<Car,
+Long> {
+// Fetch cars by brand
+List<Car> findByBrand(@Param("brand") String brand);
+  
+  
+  
+  
+  
+  
